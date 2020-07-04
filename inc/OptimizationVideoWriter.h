@@ -17,6 +17,7 @@ public:
                             Y_OFFSET(ys), Y_SCALE((h - 1) / (ye - ys)) 
     {
         backgroundImg = cv::Mat::zeros(h, w, CV_8UC3);
+        drawGrid();
     }
 
     void drawBackground(ObjectiveFunction objFun, const double gamma = 1.0);
