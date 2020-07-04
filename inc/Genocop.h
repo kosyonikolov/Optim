@@ -8,17 +8,27 @@
 #include <chrono>
 #include <stdint.h>
 
-#include "ObjectiveFunction.h"
-
-typedef std::valarray<double> Vector;
+#include "common.h"
 
 class Genocop
 {
 public:
+    // Represents an individual and his score
+    struct Score
+    {
+        Vector x;
+        double value;
+
+        bool operator<(const Score & other) const
+        {
+            return value < other.value;
+        }
+    };    
+
     struct Options
     {
         uint32_t populationCount = 100;
-        uint32_t parentsCount = 35;
+        uint32_t parentsCount = 45;
         uint32_t maxIters = 1000;
 
         // =============================================
@@ -56,24 +66,17 @@ public:
         } mutatation;
     };
 
+    typedef std::function<void(const std::vector<Score> &)> IterationCallback;
+    
+    IterationCallback callback = 0;
+
     Genocop(const uint32_t vectorSize, ObjectiveFunction objective, 
             const Vector xMin, const Vector xMax);
 
     double run(Vector & outSolution, Genocop::Options options);
     
 private:
-    // Represents an individual and his score
-    struct Score
-    {
-        Vector x;
-        double value;
-
-        bool operator<(const Score & other) const
-        {
-            return value < other.value;
-        }
-    };
-
+    
     ObjectiveFunction objFunction;
     const size_t vectorSize;
 
@@ -85,6 +88,7 @@ private:
     std::uniform_real_distribution<double> pRng;  // probability: [0, 1]
     std::uniform_real_distribution<double> mRng;  // mutation: [-1, 1]
     std::uniform_int_distribution<uint32_t> cRng; // crossover index: [1, vectorSize - 1]
+    std::normal_distribution<double> dRng;        // for direction generation
 
     Vector xMin;
     Vector xMax;
@@ -128,7 +132,9 @@ private:
     void heuristicCrossover(const Score & parent0, const Score & parent1, double alpha,
                             Vector & outChild);
 
-    void mutation(Vector & x, const double pFull, const double pFine, const double fineRange);
+    void fullRangeMutation(Vector & x, const double pFull);
+
+    void fineRangeMutation(Vector & x, const double range);
 
     // =============================================
     // =============== RNG functions ===============
@@ -151,6 +157,8 @@ private:
     {
         return this->cRng(this->randomEngine);
     }
+
+    inline void getRandomDirection(Vector & dir);
 };
 
 #endif

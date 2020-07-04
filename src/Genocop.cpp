@@ -107,6 +107,9 @@ double Genocop::run(Vector & outSolution, Genocop::Options options)
         }
 
         averageScore /= POPULATION_COUNT;
+
+        if (this->callback != 0)
+            callback(scores);
     };
 
     // main optimization loop
@@ -156,7 +159,7 @@ void Genocop::selectParents(const std::vector<Score> & scores, std::vector<Score
         for (uint32_t i = 0; i < tournamentSize; i++)
         {
             // choose an element to swap with that has a higher idx than the current element
-            const uint32_t swapIdx = idxRng(rng) % (tournamentSize - i) + i;
+            const uint32_t swapIdx = idxRng(rng) % (SCORES_COUNT - i) + i;
             std::swap(scoreIdx[i], scoreIdx[swapIdx]);
         }
 
@@ -299,7 +302,13 @@ void Genocop::createChildren(const std::vector<Score> & scores, std::vector<Scor
 
     for (uint32_t i = mutationStartIdx; i < CHILDREN_COUNT; i++)
     {
-        mutation(outChildren[i], m.pFull, m.pFine, fineMutationRange);
+        double p = getProbability();
+        if (p <= m.pFine)
+        {
+            fineRangeMutation(outChildren[i], fineMutationRange);
+        }
+
+        fullRangeMutation(outChildren[i], m.pFull);     
     }
 }
 
@@ -341,7 +350,7 @@ void Genocop::heuristicCrossover(const Score & parent0, const Score & parent1, d
     }
 }
 
-void Genocop::mutation(Vector & x, const double pFull, const double pFine, const double fineRange)
+void Genocop::fullRangeMutation(Vector & x, const double pFull)
 {
     for (uint32_t i = 0; i < x.size(); i++)
     {
@@ -351,15 +360,43 @@ void Genocop::mutation(Vector & x, const double pFull, const double pFine, const
             // full range mutation: set element to random value in range
             const double normalizedValue = getMutation();
             x[i] = offsetX[i] + scaleX[i] * normalizedValue;
-        }
-
-        p = getProbability();
-        if (p <= pFine)
-        {
-            // fine range mutation: "small" change around current value
-            const double mutationValue = fineRange * getMutation() * this->scaleX[i];
-            const double newValue = x[i] + mutationValue;
-            x[i] = std::min(this->xMax[i], std::max(this->xMin[i], newValue));
-        }        
+        }     
     }
+}
+
+void Genocop::fineRangeMutation(Vector & x, const double range)
+{
+    Vector dir = x;
+    getRandomDirection(dir);
+    double mult = getMutation() * range;
+    dir *= mult;
+
+    x += dir;
+    for (uint32_t i = 0; i < x.size(); i++)
+    {
+        x[i] = std::max(x[i], this->xMin[i]);
+        x[i] = std::min(x[i], this->xMax[i]);
+    }
+}
+
+inline void Genocop::getRandomDirection(Vector & dir)
+{
+    // Generate random direction in N-space as per Muller, M. E. "A Note on a Method for Generating Points Uniformly on N-Dimensional Spheres.", 1959. 
+
+    double sumSq = 0;
+    uint32_t i = 0;
+    while (sumSq < 1e-5 && i < 3) // avoid too small sums
+    {
+        i++;
+        for (uint32_t i = 0; i < dir.size(); i++)
+        {
+            double val = this->dRng(this->randomEngine);
+            sumSq += val * val;
+            dir[i] = val;
+        }
+    }
+
+    sumSq = std::max(1e-5, sumSq); // we may have been very unlucky
+    const double mult = 1.0 / std::sqrt(sumSq);
+    dir *= mult;
 }
