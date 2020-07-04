@@ -4,41 +4,9 @@
 #include <opencv2/opencv.hpp>
 
 #include "Genocop.h"
+#include "OptimizationVideoWriter.h"
 
 cv::VideoWriter videoWriter;
-
-void drawPopulation(const std::vector<Genocop::Score> & population)
-{
-    const uint32_t IMAGE_WIDTH = 1024;
-    const uint32_t IMAGE_HEIGHT = 1024;
-    const double X_MIN = -3;
-    const double X_MAX = 3;
-    const double Y_MIN = -3;
-    const double Y_MAX = 3;
-
-    const double SCALE_X = (IMAGE_WIDTH - 1) / (X_MAX - X_MIN);
-    const double SCALE_Y = (IMAGE_HEIGHT - 1) / (Y_MAX - Y_MIN);
-
-    // create image
-    cv::Mat image = cv::Mat::zeros(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
-
-    // TODO draw coordinate axis
-
-    // draw points
-    for (auto & score : population)
-    {
-        const double x = score.x[0];
-        const double y = score.x[1];
-
-        cv::Point2f pt(float((x - X_MIN) * SCALE_X ), float((y - Y_MIN) * SCALE_Y));
-        cv::circle(image, pt, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-    }
-
-    static uint32_t id = 0;
-    //cv::imwrite("iter_" + std::to_string(id) + ".jpg", image);
-    videoWriter << image;
-    id++;
-}
 
 double objFunc1(const Vector & x)
 {
@@ -83,20 +51,27 @@ void run2d()
     Genocop optim(2, banana, xMin, xMax);
 
     Genocop::Options options;
-    options.eliteChildrenCount = 0;
+    options.eliteChildrenCount = 1;
 
     options.tournament.p = 0.9;
     options.tournament.size = 3;
 
-    options.maxIters = 500;
-    options.mutatation.fineMutationMin = 1e-5;
+    options.maxIters = 100;
+    options.mutatation.fineMutationMin = 1e-6;
     options.mutatation.fineMutationMax = 0.3;
     options.mutatation.pFull = 0.001;
     options.mutatation.pFine = 0.2;
 
     options.crossover.totalProbability = 0.8;
 
-    optim.callback = drawPopulation;
+    // video output
+    OptimizationVideoWriter video(1024, 1024, -3, 3, -3, 3);
+    video.begin("banana.mp4");
+
+    optim.callback = [&video](const std::vector<Genocop::Score> & population)
+    {
+        video.drawFrame(population);
+    };
 
     Vector solution(1);
     double minVal = optim.run(solution, options);
@@ -106,9 +81,6 @@ void run2d()
 
 int main() 
 {
-    // open output video
-    videoWriter.open("optim.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1024, 1024));
-
     run2d();
     return 0;
 }

@@ -10,7 +10,7 @@ find_package(OpenCV REQUIRED)
 
 include_directories(inc/ ${OpenCV_INCLUDES})
 
-add_executable(Optim src/main.cpp src/common.cpp src/Genocop.cpp)
+add_executable(Optim src/main.cpp src/common.cpp src/Genocop.cpp src/OptimizationVideoWriter.cpp)
 
 target_link_libraries(Optim ${OpenCV_LIBS})
 target_compile_options(Optim PRIVATE -Wall -Wextra)
