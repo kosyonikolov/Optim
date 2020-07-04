@@ -54,12 +54,12 @@ void run2d()
     options.eliteChildrenCount = 1;
 
     options.tournament.p = 0.9;
-    options.tournament.size = 3;
+    options.tournament.size = 6;
 
     options.maxIters = 100;
-    options.mutatation.fineMutationMin = 1e-6;
-    options.mutatation.fineMutationMax = 0.3;
-    options.mutatation.pFull = 0.001;
+    options.mutatation.fineMutationMin = 1e-5;
+    options.mutatation.fineMutationMax = 0.2;
+    options.mutatation.pFull = 0.02;
     options.mutatation.pFine = 0.2;
 
     options.crossover.totalProbability = 0.8;

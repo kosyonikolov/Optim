@@ -212,7 +212,7 @@ void Genocop::createChildren(const std::vector<Score> & scores, std::vector<Scor
         // copy to output
         for (uint32_t i = 0; i < options.eliteChildrenCount; i++)
         {
-            outChildren[i] = scores[scoreIdx[i]].value;
+            outChildren[i] = scores[scoreIdx[i]].x;
         }
 
         childIdx = options.eliteChildrenCount;
@@ -298,7 +298,7 @@ void Genocop::createChildren(const std::vector<Score> & scores, std::vector<Scor
 
     // determine fine mutation range
     const auto & m = options.mutatation;
-    const double fineMutationRange = m.fineMutationMin + (m.fineMutationMax - m.fineMutationMin) * (1 - double(iter) / options.maxIters);
+    const double fineMutationRange = m.fineMutationMin + (m.fineMutationMax - m.fineMutationMin) * std::pow((1 - double(iter) / options.maxIters), 0.8);
 
     for (uint32_t i = mutationStartIdx; i < CHILDREN_COUNT; i++)
     {
@@ -308,7 +308,11 @@ void Genocop::createChildren(const std::vector<Score> & scores, std::vector<Scor
             fineRangeMutation(outChildren[i], fineMutationRange);
         }
 
-        fullRangeMutation(outChildren[i], m.pFull);     
+        p = getProbability();
+        if (p <= m.pFull)
+        {
+            fullRangeMutation(outChildren[i], m.pFull); 
+        }            
     }
 }
 
@@ -354,13 +358,9 @@ void Genocop::fullRangeMutation(Vector & x, const double pFull)
 {
     for (uint32_t i = 0; i < x.size(); i++)
     {
-        double p = getProbability();
-        if (p <= pFull)
-        {
-            // full range mutation: set element to random value in range
-            const double normalizedValue = getMutation();
-            x[i] = offsetX[i] + scaleX[i] * normalizedValue;
-        }     
+        // full range mutation: set element to random value in range
+        const double normalizedValue = getMutation();
+        x[i] = offsetX[i] + scaleX[i] * normalizedValue;
     }
 }
 
