@@ -64,13 +64,17 @@ double Genocop::run(Vector & outSolution, Genocop::Options options)
     std::vector<Score> parents(PARENTS_COUNT);
     std::vector<Score> scores(POPULATION_COUNT);
 
+    // allocate parents
+    for (uint32_t i = 0; i < PARENTS_COUNT; i++)
+    {
+        parents[i].x.resize(VECTOR_SIZE); 
+    }
+
     // create first population
     for (uint32_t i = 0; i < POPULATION_COUNT; i++)
     {
-        // allocate
-        parents[i].x.resize(VECTOR_SIZE); 
+        // allocate scores and individuals        
         scores[i].x.resize(VECTOR_SIZE);
-
         Vector & individual = population[i];
         individual.resize(VECTOR_SIZE);
         for (uint32_t j = 0; j < VECTOR_SIZE; j++)

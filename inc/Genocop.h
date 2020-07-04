@@ -10,11 +10,11 @@
 
 #include "ObjectiveFunction.h"
 
+typedef std::valarray<double> Vector;
+
 class Genocop
 {
 public:
-    typedef std::valarray<double> Vector;
-
     struct Options
     {
         uint32_t populationCount = 100;
