@@ -67,6 +67,7 @@ void run2d()
     // video output
     OptimizationVideoWriter video(1024, 1024, -3, 3, -3, 3);
     video.begin("banana.mp4");
+    video.drawBackground(banana, 0.3);
 
     optim.callback = [&video](const std::vector<Genocop::Score> & population)
     {
