@@ -55,7 +55,7 @@ void OptimizationVideoWriter::drawFrame(const std::vector<Genocop::Score> & popu
 
 void OptimizationVideoWriter::begin(const std::string & filename)
 {
-    this->videoWriter.open(filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(WIDTH, HEIGHT));
+    this->videoWriter.open(filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 2, cv::Size(WIDTH, HEIGHT));
 }
 
 void OptimizationVideoWriter::drawGrid()

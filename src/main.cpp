@@ -147,7 +147,7 @@ void run2d_rastrigin()
         video.drawFrame(population);
     };
 
-    Vector solution(1);
+    Vector solution(2);
     double minVal = optim.run(solution, options);
 
     std::cout << "Min value: " << minVal << " at x = " << solution  << "\n"; 
@@ -185,7 +185,7 @@ void run2d_himmelblau()
         video.drawFrame(population);
     };
 
-    Vector solution(1);
+    Vector solution(2);
     double minVal = optim.run(solution, options);
 
     std::cout << "Min value: " << minVal << " at x = " << solution  << "\n"; 
@@ -223,7 +223,7 @@ void run2d_levi13()
         video.drawFrame(population);
     };
 
-    Vector solution(1);
+    Vector solution(2);
     double minVal = optim.run(solution, options);
 
     std::cout << "Min value: " << minVal << " at x = " << solution  << "\n"; 
@@ -233,7 +233,7 @@ double f2d(const Vector & vec)
 {
     double x = vec[0];
     double y = vec[1];
-    double sum = x + 10.0 * y;
+    double sum = x * x + 10.0 * y * y;
     double val = sum * sum;
     //double val = std::pow(x + 10.0 * y, 2);
     return val;
@@ -263,15 +263,15 @@ void run2d_f()
 
     // video output
     OptimizationVideoWriter video(1024, 1024, -10, 10, -10, 10);
-    video.begin("levi13.mp4");
-    video.drawBackground(f2d, 0.5);
+    video.begin("poly.mp4");
+    video.drawBackground(f2d, 0.2);
 
     optim.callback = [&video](const std::vector<Genocop::Score> & population)
     {
         video.drawFrame(population);
     };
 
-    Vector solution(1);
+    Vector solution;
     double minVal = optim.run(solution, options);
 
     std::cout << "Min value: " << minVal << " at x = " << solution  << "\n"; 
